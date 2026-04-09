@@ -394,7 +394,7 @@
         hintBoxContainer.style.display = 'none';
         
         if (explanationText && explanationText.trim() !== '') {
-            hintContent.innerText = explanationText;
+            hintContent.innerHTML = explanationText;
             document.getElementById('btnRevealHints').style.opacity = '1';
             document.getElementById('btnRevealHints').style.pointerEvents = 'auto';
         } else {
