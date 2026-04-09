@@ -103,6 +103,14 @@
             font-size: 1.05rem; line-height: 1.7; text-align: left; word-break: keep-all;
         }
         
+        .question-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 8px 0;
+            display: block;
+        }
+        
         .q-prefix {
             font-weight: 700; color: #4b5563; display: block; margin-top: 8px;
         }
@@ -134,6 +142,14 @@
             color: #4b5563;
         }
         .hint-box-container strong { color: #374151; margin-right: 8px; font-weight: 700; }
+
+        .memo-pad {
+            width: 100%; min-height: 140px; margin-top: 16px; padding: 12px 16px;
+            border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; font-size: 1rem;
+            resize: vertical; background-color: #ffffff; color: #374151;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05); line-height: 1.6;
+        }
+        .memo-pad:focus { outline: none; border-color: #9ca3af; }
 
         .controls { display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         button {
@@ -169,10 +185,10 @@
     <div class="card" id="setupView">
         <div class="setup-box">
             <h2>학습할 과목 범위 선택</h2>
-            <div style="margin-bottom: 8px;">
-                <label style="cursor: pointer; font-weight: 600;">
-                    <input type="checkbox" id="checkAll" checked onchange="toggleAllSubjects(this)"> 전체 선택 / 해제
-                </label>
+            <div style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 12px;" onclick="toggleChapters('all')" id="toggleAllBtn">전체 해제</button>
+                <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 12px; border-color: #6b7280; color: #4b5563;" onclick="toggleChapters('theory')" id="toggleTheoryBtn">이론 전체 해제</button>
+                <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 6px 12px; border-color: #6b7280; color: #4b5563;" onclick="toggleChapters('code')" id="toggleCodeBtn">기출 전체 해제</button>
             </div>
             <div class="subject-filters" id="subjectCheckboxContainer">
                 <!-- Javascript로 동적 생성 -->
@@ -257,7 +273,7 @@
             }
             htmlStr += `
             <label>
-                <input type="checkbox" class="chapter-cb" value="${ch}" checked>
+                <input type="checkbox" class="chapter-cb" value="${ch}" checked onchange="updateToggleButtons()">
                 ${ch}
             </label>
             `;
@@ -269,12 +285,32 @@
             document.getElementById('resumeContainer').style.display = 'flex';
         }
 
+        updateToggleButtons();
         showSetupView();
     }
 
-    function toggleAllSubjects(source) {
-        const checkboxes = document.querySelectorAll('.chapter-cb');
-        checkboxes.forEach(cb => cb.checked = source.checked);
+    function toggleChapters(type) {
+        const checkboxes = Array.from(document.querySelectorAll('.chapter-cb'));
+        let targetCbs = [];
+        if (type === 'all') targetCbs = checkboxes;
+        else if (type === 'theory') targetCbs = checkboxes.filter(cb => !cb.value.includes('기출문제'));
+        else if (type === 'code') targetCbs = checkboxes.filter(cb => cb.value.includes('기출문제'));
+
+        const allChecked = targetCbs.every(cb => cb.checked);
+        targetCbs.forEach(cb => cb.checked = !allChecked);
+        updateToggleButtons();
+    }
+
+    function updateToggleButtons() {
+        const checkboxes = Array.from(document.querySelectorAll('.chapter-cb'));
+        if(checkboxes.length === 0) return;
+        
+        const theoryCbs = checkboxes.filter(cb => !cb.value.includes('기출문제'));
+        const codeCbs = checkboxes.filter(cb => cb.value.includes('기출문제'));
+
+        document.getElementById('toggleAllBtn').textContent = checkboxes.every(cb => cb.checked) ? '전체 해제' : '전체 선택';
+        document.getElementById('toggleTheoryBtn').textContent = theoryCbs.every(cb => cb.checked) ? '이론 전체 해제' : '이론 전체 선택';
+        document.getElementById('toggleCodeBtn').textContent = codeCbs.every(cb => cb.checked) ? '기출 전체 해제' : '기출 전체 선택';
     }
 
     function showSetupView() {
@@ -399,6 +435,10 @@
         let htmlText = rawText.replace(/\[\[([\s\S]*?)\]\]/g, function(match, p1) {
             return `<span class="blank" data-answer="${escapeHtml(p1)}" onclick="reveal(this)"></span>`;
         });
+
+        if (currentData.chapter && currentData.chapter.includes('기출문제')) {
+            htmlText += `<textarea class="memo-pad" placeholder="직접 코드 변수 값을 추적(Tracing)하거나 메모해보세요..."></textarea>`;
+        }
 
         // 문제 렌더링
         document.getElementById('quizContent').innerHTML = htmlText;
