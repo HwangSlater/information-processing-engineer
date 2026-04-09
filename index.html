@@ -232,7 +232,7 @@
 
     function init() {
         if (typeof codeQuestions !== 'undefined') {
-            quizQuestions = quizQuestions.concat(codeQuestions);
+            quizQuestions.push(...codeQuestions);
         }
         
         if (typeof quizQuestions === 'undefined' || quizQuestions.length === 0) {
