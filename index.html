@@ -319,8 +319,10 @@
             <div class="setup-box">
                 <h2>학습할 과목 범위 선택</h2>
                 <div style="margin-bottom: 16px; display: flex; align-items: center;">
-                    <label style="cursor: pointer; font-weight: 600; font-size: 1.05rem; color: #111827; display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="toggleAllCb" checked onchange="toggleChapters('all')" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label
+                        style="cursor: pointer; font-weight: 600; font-size: 1.05rem; color: #111827; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="toggleAllCb" checked onchange="toggleChapters('all')"
+                            style="width: 18px; height: 18px; cursor: pointer;">
                         전체 과목 선택
                     </label>
                 </div>
@@ -368,6 +370,10 @@
                 설정으로 돌아가기
             </button>
         </div>
+        
+        <div style="text-align: center; margin-top: 30px; margin-bottom: 10px; font-size: 0.85rem; color: #9ca3af; line-height: 1.5;">
+            * 본 웹사이트는 개인의 학습 목적을 위해 만들어졌으며, 어떠한 수익 창출도 추구하지 않습니다.
+        </div>
     </div>
 
     <script src="quiz_data.js"></script>
@@ -406,7 +412,7 @@
                 if (idx === 0) {
                     htmlStr += `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
-                        <strong style="color: #374151; font-size: 1.05rem;">📘 정보처리기사 이론</strong>
+                        <strong style="color: #374151; font-size: 1.05rem;">정보처리기사 이론</strong>
                         <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('theory')" id="toggleTheoryBtn">이론 전체 해제</button>
                     </div>`;
                 }
@@ -414,12 +420,11 @@
                 if (ch.includes('기출문제') && (idx === 0 || !chapters[idx - 1].includes('기출문제'))) {
                     htmlStr += `
                     <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
-                        <strong style="color: #374151; font-size: 1.05rem;">💻 프로그래밍/SQL 기출문제</strong>
+                        <strong style="color: #374151; font-size: 1.05rem;">프로그래밍/SQL 기출문제</strong>
                         <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('code')" id="toggleCodeBtn">기출 전체 해제</button>
                     </div>
                     <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 12px; line-height: 1.4;">
-                        출처: <a href="https://complainrevolutionist.tistory.com/210" target="_blank" style="color: #60a5fa; text-decoration: underline;">잡코딩 정보 블로그</a><br>
-                        * 본 사이트는 개인의 학습 목적을 위해 만들어졌으며, 어떤 형태의 수익 창출도 하지 않습니다.
+                        출처: <a href="https://complainrevolutionist.tistory.com/210" target="_blank" style="color: #60a5fa; text-decoration: underline;">잡코딩 정보 블로그</a>
                     </div>`;
                 }
                 htmlStr += `
@@ -463,7 +468,7 @@
             if (toggleAllCb) {
                 toggleAllCb.checked = checkboxes.every(cb => cb.checked);
             }
-            
+
             const btnTheory = document.getElementById('toggleTheoryBtn');
             if (btnTheory) {
                 btnTheory.textContent = theoryCbs.every(cb => cb.checked) ? '이론 전체 해제' : '이론 선택';
