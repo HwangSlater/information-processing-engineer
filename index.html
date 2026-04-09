@@ -78,6 +78,13 @@
             justify-content: center;
             line-height: 1.8;
             font-size: 1.15rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+        
+        @media (max-width: 600px) {
+            .card { padding: 24px 20px; }
         }
 
         /* 시작화면 설정 박스 */
@@ -129,6 +136,15 @@
             word-break: keep-all;
             overflow-x: auto;
             max-width: 100%;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .question-box pre, .question-box table {
+            display: block;
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 0;
         }
 
         .question-box img {
