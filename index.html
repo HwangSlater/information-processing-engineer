@@ -109,10 +109,11 @@
 
         .blank {
             display: inline-flex; align-items: center; justify-content: center;
-            min-width: 80px; height: 32px; padding: 0 12px; margin: 0 4px;
+            min-width: 80px; min-height: 32px; padding: 4px 12px; margin: 0 4px;
             background-color: var(--blank-bg); border: 1px dashed var(--blank-border);
             border-radius: 4px; color: transparent; cursor: pointer;
             transition: all 0.2s ease; position: relative; vertical-align: middle; font-weight: 600;
+            white-space: pre-wrap; text-align: left;
         }
         .blank:hover { border-color: #4b5563; background-color: #e5e7eb; }
         .blank.revealed {
@@ -218,6 +219,7 @@
 </div>
 
 <script src="quiz_data.js"></script>
+<script src="code_data.js"></script>
 
 <script>
     let activeQuestions = [];
@@ -229,6 +231,10 @@
     let chapters = [];
 
     function init() {
+        if (typeof codeQuestions !== 'undefined') {
+            quizQuestions = quizQuestions.concat(codeQuestions);
+        }
+        
         if (typeof quizQuestions === 'undefined' || quizQuestions.length === 0) {
             document.getElementById('setupView').innerHTML = "<p style='color:#ef4444'>오류: quiz_data.js 파일을 로드하지 못했거나 문제가 없습니다.</p>";
             return;
@@ -243,12 +249,20 @@
 
         // 체크박스 생성
         const container = document.getElementById('subjectCheckboxContainer');
-        container.innerHTML = chapters.map((ch, idx) => `
+        let htmlStr = '';
+        chapters.forEach((ch, idx) => {
+            if (ch.includes('기출문제') && (idx === 0 || !chapters[idx-1].includes('기출문제'))) {
+                htmlStr += '<hr style="margin: 12px 0 8px 0; border: 0; border-top: 1px solid #e5e7eb;">';
+                htmlStr += '<div style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 8px;">👇 <strong>프로그래밍/SQL 기출문제</strong> (출처: 잡코딩 정보 블로그)</div>';
+            }
+            htmlStr += `
             <label>
                 <input type="checkbox" class="chapter-cb" value="${ch}" checked>
                 ${ch}
             </label>
-        `).join('');
+            `;
+        });
+        container.innerHTML = htmlStr;
 
         // 세션(쿠키/스토리지) 확인
         if (localStorage.getItem('quizAppState')) {
@@ -382,7 +396,7 @@
         const rawText = currentData.q;
         const explanationText = currentData.hint;
         
-        let htmlText = rawText.replace(/\[\[(.*?)\]\]/g, function(match, p1) {
+        let htmlText = rawText.replace(/\[\[([\s\S]*?)\]\]/g, function(match, p1) {
             return `<span class="blank" data-answer="${escapeHtml(p1)}" onclick="reveal(this)"></span>`;
         });
 
@@ -411,7 +425,7 @@
 
     function reveal(element) {
         if (element.classList.contains('revealed')) return;
-        element.textContent = element.getAttribute('data-answer');
+        element.innerHTML = element.getAttribute('data-answer').replace(/\n/g, '<br>');
         element.classList.add('revealed');
         checkRevealAllState();
     }
