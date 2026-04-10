@@ -226,6 +226,32 @@
             font-weight: 700;
         }
 
+        img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        pre {
+            background-color: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.95rem;
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: #d97706;
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
         .memo-pad {
             width: 100%;
             min-height: 140px;
@@ -328,9 +354,15 @@
 
     <div class="container">
         <header>
-            <h1>정보처리기사 실기 테스트</h1>
+            <h1 onclick="goToSetup()" style="cursor: pointer; display: inline-block;">정보처리기사 실기 테스트</h1>
             <div class="stats" id="statsDisplay">&nbsp;</div>
         </header>
+
+        <!-- 탭 네비게이션 -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; background-color: #e5e7eb; padding: 6px; border-radius: 10px;">
+            <button id="tabBtnQuiz" onclick="switchTab('quiz')" class="btn-primary" style="flex: 1; border-radius: 6px; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">실전 랜덤 퀴즈</button>
+            <button id="tabBtnTyping" onclick="switchTab('typing')" class="btn-secondary" style="flex: 1; border-radius: 6px; border: none; background: transparent; color: #4b5563; box-shadow: none;">핵심 요약 암기장</button>
+        </div>
 
         <!-- 1. 설정 화면 (과목 선택) -->
         <div class="card" id="setupView">
@@ -350,13 +382,7 @@
                 <div class="controls" style="margin-top: 20px;">
                     <button class="btn-primary" onclick="startNewSession()"
                         style="flex: 1; justify-content: center; font-size: 1.1rem; padding: 14px;">
-                        새로운 퀴즈 시작 (기록 초기화)
-                    </button>
-                </div>
-                <div id="resumeContainer" class="controls" style="margin-top: 8px; display: none;">
-                    <button class="btn-secondary" onclick="resumeSession()"
-                        style="flex: 1; justify-content: center; background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd;">
-                        이전 학습 기록 이어하기
+                        새로운 실전 랜덤 퀴즈 시작
                     </button>
                 </div>
             </div>
@@ -369,7 +395,7 @@
             </div>
 
             <div class="hint-box-container" id="hintBoxContainer" style="display: none;">
-                <strong>해당 지문의 핵심 요약:</strong>
+                <strong id="hintTitle">해당 지문의 핵심 요약:</strong>
                 <div id="hintContent" style="margin-top: 6px; font-size: 0.95rem;"></div>
             </div>
         </div>
@@ -384,9 +410,20 @@
             <button class="btn-primary" id="btnNext" onclick="nextQuestion()">
                 다음 무작위 문제
             </button>
-            <button class="btn-secondary" onclick="goToSetup()" style="margin-left: auto;">
-                설정으로 돌아가기
+            <button class="btn-danger" id="btnRequeue" onclick="requeueQuestion()">
+                모르겠어요 (다시 풀기)
             </button>
+        </div>
+
+        <!-- 3. 타이핑 암기 화면 -->
+        <div class="card view-hidden" id="typingView">
+            <div class="setup-box">
+                <h2>핵심 요약 암기장</h2>
+                <p style="font-size: 0.95rem; color: #6b7280; margin-bottom: 12px; word-break: keep-all;">설명을 읽고 키워드를 맞춰보세요. 암기법 보기 버튼을 누르면 정답과 암기법이 표시됩니다.</p>
+                <div id="typingContentContainer" style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- 암기 폼 생성됨 -->
+                </div>
+            </div>
         </div>
         
         <div style="text-align: center; margin-top: 30px; margin-bottom: 10px; font-size: 0.85rem; color: #9ca3af; line-height: 1.5;">
@@ -394,6 +431,7 @@
         </div>
     </div>
 
+    <script src="mnemonic_data.js"></script>
     <script src="quiz_data.js"></script>
     <script src="code_data.js"></script>
 
@@ -431,7 +469,7 @@
                     htmlStr += `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
                         <strong style="color: #374151; font-size: 1.05rem;">정보처리기사 이론</strong>
-                        <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('theory')" id="toggleTheoryBtn">이론 전체 해제</button>
+                        <button class="btn btn-secondary" style="font-size: 0.95rem; padding: 6px 14px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('theory')" id="toggleTheoryBtn">이론 전체 해제</button>
                     </div>`;
                 }
 
@@ -439,7 +477,7 @@
                     htmlStr += `
                     <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">
                         <strong style="color: #374151; font-size: 1.05rem;">프로그래밍/SQL 기출문제</strong>
-                        <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 10px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('code')" id="toggleCodeBtn">기출 전체 해제</button>
+                        <button class="btn btn-secondary" style="font-size: 0.95rem; padding: 6px 14px; border-color: #d1d5db; color: #4b5563;" onclick="toggleChapters('code')" id="toggleCodeBtn">기출 전체 해제</button>
                     </div>
                     <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 12px; line-height: 1.4;">
                         출처: <a href="https://complainrevolutionist.tistory.com/210" target="_blank" style="color: #60a5fa; text-decoration: underline;">잡코딩 정보 블로그</a>
@@ -454,13 +492,8 @@
             });
             container.innerHTML = htmlStr;
 
-            // 세션(쿠키/스토리지) 확인
-            if (localStorage.getItem('quizAppState')) {
-                document.getElementById('resumeContainer').style.display = 'flex';
-            }
-
-            updateToggleButtons();
-            showSetupView();
+            initTypingTab();
+            switchTab('quiz');
         }
 
         function toggleChapters(type) {
@@ -505,12 +538,8 @@
         }
 
         function goToSetup() {
-            if (confirm("설정 화면으로 돌아가시겠습니까? 현재 진행 상황은 자동으로 저장됩니다.")) {
+            if (confirm("설정 화면으로 돌아가시겠습니까?")) {
                 showSetupView();
-                // 돌아갈 때 resume 버튼을 활성화하기 위해 세션 체크 다시함
-                if (localStorage.getItem('quizAppState')) {
-                    document.getElementById('resumeContainer').style.display = 'flex';
-                }
             }
         }
 
@@ -537,8 +566,6 @@
             unvisitedIndices = [...activeQuestions];
             shuffleArray(unvisitedIndices);
 
-            saveState();
-
             document.getElementById('setupView').classList.add('view-hidden');
             document.getElementById('quizView').classList.remove('view-hidden');
             document.getElementById('quizControls').classList.remove('view-hidden');
@@ -546,41 +573,88 @@
             nextQuestion(true);
         }
 
-        function resumeSession() {
-            const saved = localStorage.getItem('quizAppState');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    activeQuestions = data.activeQuestions;
-                    unvisitedIndices = data.unvisitedIndices;
-                    currentQuestionIndex = data.currentQuestionIndex;
-                    totalActiveCount = activeQuestions.length;
+        function requeueQuestion() {
+            const currentIdx = currentQuestionIndex;
+            if (unvisitedIndices.length === 0) {
+                unvisitedIndices.push(currentIdx);
+            } else {
+                const randomPos = Math.floor(Math.random() * (unvisitedIndices.length + 1));
+                unvisitedIndices.splice(randomPos, 0, currentIdx);
+            }
+            alert("이 문제를 랜덤 대기열 무작위 위치에 다시 넣었습니다!");
+            nextQuestion(false);
+        }
 
-                    document.getElementById('setupView').classList.add('view-hidden');
-                    document.getElementById('quizView').classList.remove('view-hidden');
-                    document.getElementById('quizControls').classList.remove('view-hidden');
+        function switchTab(tabId) {
+            const btnQuiz = document.getElementById('tabBtnQuiz');
+            const btnTyping = document.getElementById('tabBtnTyping');
+            const setupView = document.getElementById('setupView');
+            const quizView = document.getElementById('quizView');
+            const quizControls = document.getElementById('quizControls');
+            const typingView = document.getElementById('typingView');
 
-                    // 직전 문제를 다시 보여줌
-                    if (currentQuestionIndex === -1 && unvisitedIndices.length > 0) {
-                        nextQuestion(true);
-                    } else {
-                        renderQuestion();
-                        updateStats();
-                    }
-                } catch (e) {
-                    alert("저장된 기록을 불러오는데 실패했습니다.");
-                    localStorage.removeItem('quizAppState');
-                }
+            if (tabId === 'quiz') {
+                btnQuiz.className = 'btn-primary';
+                btnTyping.className = 'btn-secondary';
+                btnTyping.style.border = 'none';
+                btnTyping.style.background = 'transparent';
+                btnTyping.style.boxShadow = 'none';
+                btnTyping.style.color = '#4b5563';
+                
+                btnQuiz.style.background = '';
+                btnQuiz.style.border = 'none';
+                btnQuiz.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                btnQuiz.style.color = '';
+                
+                showSetupView();
+                typingView.classList.add('view-hidden');
+            } else {
+                btnQuiz.className = 'btn-secondary';
+                btnTyping.className = 'btn-primary';
+                btnQuiz.style.border = 'none';
+                btnQuiz.style.background = 'transparent';
+                btnQuiz.style.boxShadow = 'none';
+                btnQuiz.style.color = '#4b5563';
+                
+                btnTyping.style.background = '';
+                btnTyping.style.border = 'none';
+                btnTyping.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                btnTyping.style.color = '';
+                
+                setupView.classList.add('view-hidden');
+                quizView.classList.add('view-hidden');
+                quizControls.classList.add('view-hidden');
+                typingView.classList.remove('view-hidden');
             }
         }
 
-        function saveState() {
-            const state = {
-                activeQuestions: activeQuestions,
-                unvisitedIndices: unvisitedIndices,
-                currentQuestionIndex: currentQuestionIndex
-            };
-            localStorage.setItem('quizAppState', JSON.stringify(state));
+        function initTypingTab() {
+            const container = document.getElementById('typingContentContainer');
+            if (typeof mnemonicData === 'undefined') return;
+            
+            let html = '';
+            mnemonicData.forEach((item, index) => {
+                html += `
+                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px;">
+                    <div style="font-weight: 700; color: #1f2937; margin-bottom: 8px;">Q. ${item.title}</div>
+                    <div style="color: #4b5563; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.5;">${item.desc}</div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="revealMnemonic(${index})" style="padding: 8px 16px;">암기법 / 해설 보기</button>
+                    </div>
+                    <div id="typeFull_${index}" style="margin-top: 8px; padding: 12px; background: #e0f2fe; color: #0369a1; border-left: 4px solid #0284c7; font-size: 0.95rem; display: none; line-height: 1.5;"><span style="font-weight: bold; color: #0284c7;">정답: ${item.answer}</span><br><br>${item.full_text.replace(/💡 /g, '')}</div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function revealMnemonic(index) {
+            const fullEl = document.getElementById(`typeFull_${index}`);
+            if(fullEl.style.display === 'none') {
+                fullEl.style.display = 'block';
+            } else {
+                fullEl.style.display = 'none';
+            }
         }
 
         function shuffleArray(array) {
@@ -599,9 +673,6 @@
 
             currentQuestionIndex = unvisitedIndices.pop();
 
-            // 상태 저장
-            saveState();
-
             updateStats();
             renderQuestion();
         }
@@ -616,23 +687,39 @@
             const rawText = currentData.q;
             const explanationText = currentData.hint;
 
+            let isCodeQuestion = currentData.chapter && currentData.chapter.includes('기출문제');
+
+            let answersArr = [];
             let htmlText = rawText.replace(/\[\[([\s\S]*?)\]\]/g, function (match, p1) {
-                return `<span class="blank" data-answer="${escapeHtml(p1)}" onclick="reveal(this)"></span>`;
+                answersArr.push(p1);
+                let safeAns = escapeHtml(p1).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+                return `<span class="blank" data-answer="${safeAns}" onclick="reveal(this)"></span>`;
             });
 
-            if (currentData.chapter && currentData.chapter.includes('기출문제')) {
+            let prefixHtml = "";
+            let sideContent = "";
+            const hintTitle = document.getElementById('hintTitle');
+
+            if (isCodeQuestion) {
                 htmlText += `<textarea class="memo-pad" placeholder="직접 코드 변수 값을 추적(Tracing)하거나 메모해보세요..."></textarea>`;
+                hintTitle.textContent = "상세 해설 및 풀이 과정:";
+                
+                sideContent = `<div style="font-weight: 700; color: #4338ca; margin-bottom: 8px;">[단계별 코드 추적(Tracing) 해설]</div>
+                               <div style="color: #475569; line-height: 1.6;">${explanationText ? explanationText : '이 문제에 대한 상세 해설이 곧 추가될 예정입니다.'}</div>`;
+            } else {
+                hintTitle.textContent = "해당 지문의 핵심 요약:";
+                sideContent = explanationText;
             }
 
             // 문제 렌더링
-            document.getElementById('quizContent').innerHTML = htmlText;
+            document.getElementById('quizContent').innerHTML = prefixHtml + htmlText;
 
             const hintBoxContainer = document.getElementById('hintBoxContainer');
             const hintContent = document.getElementById('hintContent');
             hintBoxContainer.style.display = 'none';
 
-            if (explanationText && explanationText.trim() !== '') {
-                hintContent.innerHTML = explanationText;
+            if (sideContent && sideContent.trim() !== '') {
+                hintContent.innerHTML = sideContent;
                 document.getElementById('btnRevealHints').style.opacity = '1';
                 document.getElementById('btnRevealHints').style.pointerEvents = 'auto';
             } else {
@@ -645,11 +732,15 @@
 
         function revealHints() {
             document.getElementById('hintBoxContainer').style.display = 'block';
+            const currentData = quizQuestions[currentQuestionIndex];
+            if (currentData.chapter && currentData.chapter.includes('기출문제')) {
+                revealAll();
+            }
         }
 
         function reveal(element) {
             if (element.classList.contains('revealed')) return;
-            element.innerHTML = element.getAttribute('data-answer').replace(/\n/g, '<br>');
+            element.innerHTML = element.getAttribute('data-answer');
             element.classList.add('revealed');
             checkRevealAllState();
         }

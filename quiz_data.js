@@ -69,8 +69,7 @@ const quizQuestions = [
   {
     chapter: "Chapter 1. 요구사항 확인 (디자인 패턴 포함)",
     q: `<span class="q-prefix">Q. 럼바우 분석 절차를 진행 순서에 맞게 나열하시오. (21년 2회)</span>
-<div class="question-box">
-진행 순서: [[객체 모델링]] -> [[동적 모델링]] -> [[기능 모델링]] (객동기)
+진행 순서: [[객체 모델링]] -> [[동적 모델링]] -> [[기능 모델링]]
 </div>`,
     hint: "럼바우 기법의 순서는 객체, 동적, 기능 순입니다. 앞글자를 따서 <strong>'객.동.기'</strong>로 무조건 암기하세요."
   },
@@ -113,7 +112,7 @@ const quizQuestions = [
     q: `<span class="q-prefix">Q. 다음 설명에 해당하는 디자인 패턴을 쓰시오. (구조 패턴 중 하나)</span>
 <div class="question-box">기존에 구현되어 있는 클래스에 필요한 기능을 추가해 나가는 설계 패턴으로, 객체 간의 결합을 통해 기능을 동적으로 유연하게 확장할 수 있게 해주어 상속의 대안으로 사용하는 디자인 패턴</div>
 정답: [[Decorator (데코레이터)]]`,
-    hint: "상속 대신 기존 객체에 <strong>포장지(장식)를 덧씌워 유연하게 기능을 확장</strong>해 나가는 패턴입니다."
+    hint: "상속 대신 기존 객체에 <strong>포장지(장식)를 덧씌워 유연하게 기능을 확장</strong>해 나가는 패턴입니다.<br><br><strong>[디자인 패턴 전체 암기법]</strong><br>- <strong>생성 패턴 (생-빌프로팩싱)</strong>: Builder, Prototype, Factory Method, Singleton, Abstract Factory<br>- <strong>구조 패턴 (구-브데퍼플프컴어)</strong>: Bridge, Decorator, Facade, Flyweight, Proxy, Composite, Adapter<br>- <strong>행위 패턴 (행-옵상메커이템 등)</strong>: Observer, State, Memento, Command, Iterator, Template Method... 등"
   },
   {
     chapter: "Chapter 1. 요구사항 확인 (디자인 패턴 포함)",
